@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Sun, Moon } from 'lucide-react';
 import './index.css';
 
 interface Stat {
@@ -20,6 +21,17 @@ function App() {
   const [country, setCountry] = useState<CountryInfo | null>(null);
   const [localClicks, setLocalClicks] = useState(0);
   const [effects, setEffects] = useState<{ id: number; x: number; y: number }[]>([]);
+  const [theme, setTheme] = useState<'light' | 'dark'>(
+    (localStorage.getItem('theme') as 'light' | 'dark') || 'light'
+  );
+
+  // 0. Theme Effect
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
 
   // 1. Detect Country on Load
   useEffect(() => {
@@ -79,6 +91,10 @@ function App() {
 
   return (
     <div className="app-container">
+      <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle Theme">
+        {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+      </button>
+
       <h1>Pet the Cat!</h1>
       
       {/* AdSense Top Slot */}
@@ -126,7 +142,8 @@ function App() {
               position: 'fixed',
               pointerEvents: 'none',
               fontSize: '24px',
-              color: '#ff6b6b'
+              color: '#ff6b6b',
+              zIndex: 100
             }}
           >
             ❤
