@@ -1,0 +1,9 @@
+{
+  "name": "pet-the-cat",
+  "private": true,
+  "scripts": {
+    "install:client": "cd client && npm install",
+    "build:client": "cd client && npm run build",
+    "deploy": "npm run install:client && npm run build:client"
+  }
+}
