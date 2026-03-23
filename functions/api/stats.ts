@@ -10,6 +10,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     ).all();
 
     // 2. 최근 5분간의 급상승 순위 (Top 10)
+    // strftime('%Y-%m-%d %H:%M:%S', 'now', '-5 minutes') 를 사용하여 정확한 시점 비교
     const recentStats = await context.env.DB.prepare(`
       SELECT country_code, country_name, COUNT(*) as click_count 
       FROM click_log 
@@ -20,8 +21,8 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     `).all();
     
     return new Response(JSON.stringify({
-      allTime: allTimeStats.results,
-      recent: recentStats.results
+      allTime: allTimeStats.results || [],
+      recent: recentStats.results || []
     }), {
       headers: { 
         "Content-Type": "application/json",
@@ -29,6 +30,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       },
     });
   } catch (error) {
+    console.error(error);
     return new Response(JSON.stringify({ allTime: [], recent: [] }), {
       headers: { "Content-Type": "application/json" },
     });

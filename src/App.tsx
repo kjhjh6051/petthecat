@@ -38,6 +38,7 @@ function App() {
 
   const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
 
+  // Detect Country
   useEffect(() => {
     fetch('https://ipapi.co/json/')
       .then(res => res.json())
@@ -45,6 +46,7 @@ function App() {
       .catch(() => setCountry({ country: 'UN', country_name: 'Unknown' }));
   }, []);
 
+  // Fetch Stats
   useEffect(() => {
     const fetchStats = () => {
       fetch(`${API_URL}/stats`)
@@ -77,6 +79,8 @@ function App() {
     }).catch(console.error);
   };
 
+  const getFlagUrl = (code: string) => `https://flagcdn.com/w40/${code.toLowerCase()}.png`;
+
   const currentStats = rankTab === 'allTime' ? stats.allTime : stats.recent;
 
   return (
@@ -98,30 +102,31 @@ function App() {
 
       <div className="clicks-info">
         <p>Your Contribution: {localClicks}</p>
-        <p>Location: {country?.country_name || '...'}</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
+          {country?.country && <img src={getFlagUrl(country.country)} alt={country.country} width="20" />}
+          <span>{country?.country_name || '...'}</span>
+        </div>
       </div>
 
       <div className="stats-panel">
         <div className="tab-buttons">
-          <button 
-            className={rankTab === 'allTime' ? 'active' : ''} 
-            onClick={() => setRankTab('allTime')}
-          >
+          <button className={rankTab === 'allTime' ? 'active' : ''} onClick={() => setRankTab('allTime')}>
             <Trophy size={12} /> All-Time
           </button>
-          <button 
-            className={rankTab === 'recent' ? 'active' : ''} 
-            onClick={() => setRankTab('recent')}
-          >
+          <button className={rankTab === 'recent' ? 'active' : ''} onClick={() => setRankTab('recent')}>
             <TrendingUp size={12} /> Trending (5m)
           </button>
         </div>
 
         <div className="rankings">
-          {currentStats.length === 0 ? <p>Waiting for data...</p> : (
+          {currentStats.length === 0 ? <p style={{ fontSize: '8px', padding: '10px' }}>Be the first to pet in the last 5 minutes!</p> : (
             currentStats.map((stat, idx) => (
               <div key={stat.country_code} className="stat-item">
-                <span>{idx + 1}. {stat.country_name}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ minWidth: '20px' }}>{idx + 1}.</span>
+                  <img src={getFlagUrl(stat.country_code)} alt={stat.country_code} width="16" />
+                  <span>{stat.country_name}</span>
+                </div>
                 <span>{stat.click_count.toLocaleString()}</span>
               </div>
             ))
@@ -136,9 +141,10 @@ function App() {
             initial={{ opacity: 1, y: eff.y - 50, x: eff.x - 10 }}
             animate={{ opacity: 0, y: eff.y - 150 }}
             exit={{ opacity: 0 }}
-            style={{ position: 'fixed', pointerEvents: 'none', fontSize: '24px', color: '#ff6b6b', zIndex: 100 }}
+            style={{ position: 'fixed', pointerEvents: 'none', zIndex: 100, display: 'flex', flexDirection: 'column', alignItems: 'center' }}
           >
-            ❤
+            <span style={{ fontSize: '20px' }}>❤</span>
+            {country?.country && <img src={getFlagUrl(country.country)} alt="flag" width="16" style={{ marginTop: '-10px' }} />}
           </motion.div>
         ))}
       </AnimatePresence>
