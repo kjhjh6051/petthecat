@@ -4,6 +4,10 @@
   "scripts": {
     "install:client": "cd client && npm install",
     "build:client": "cd client && npm run build",
-    "deploy": "npm run install:client && npm run build:client"
+    "deploy": "wrangler deploy",
+    "preview": "wrangler dev"
+  },
+  "devDependencies": {
+    "wrangler": "^4.76.0"
   }
 }
