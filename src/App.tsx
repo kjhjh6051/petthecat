@@ -1,12 +1,17 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon, TrendingUp, Trophy } from 'lucide-react';
 import './index.css';
 
 interface Stat {
   country_code: string;
   country_name: string;
   click_count: number;
+}
+
+interface StatsResponse {
+  allTime: Stat[];
+  recent: Stat[];
 }
 
 interface CountryInfo {
@@ -17,7 +22,8 @@ interface CountryInfo {
 const API_URL = '/api';
 
 function App() {
-  const [stats, setStats] = useState<Stat[]>([]);
+  const [stats, setStats] = useState<StatsResponse>({ allTime: [], recent: [] });
+  const [rankTab, setRankTab] = useState<'allTime' | 'recent'>('allTime');
   const [country, setCountry] = useState<CountryInfo | null>(null);
   const [localClicks, setLocalClicks] = useState(0);
   const [effects, setEffects] = useState<{ id: number; x: number; y: number }[]>([]);
@@ -32,7 +38,6 @@ function App() {
 
   const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
 
-  // Detect Country
   useEffect(() => {
     fetch('https://ipapi.co/json/')
       .then(res => res.json())
@@ -40,14 +45,11 @@ function App() {
       .catch(() => setCountry({ country: 'UN', country_name: 'Unknown' }));
   }, []);
 
-  // Fetch Stats
   useEffect(() => {
     const fetchStats = () => {
       fetch(`${API_URL}/stats`)
         .then(res => res.json())
-        .then(data => {
-          if (Array.isArray(data)) setStats(data);
-        })
+        .then(data => setStats(data))
         .catch(console.error);
     };
 
@@ -72,19 +74,20 @@ function App() {
         countryCode: country.country,
         countryName: country.country_name
       })
-    })
-    .catch(console.error);
+    }).catch(console.error);
   };
+
+  const currentStats = rankTab === 'allTime' ? stats.allTime : stats.recent;
 
   return (
     <div className="app-container">
-      <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle Theme">
-        {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+      <button className="theme-toggle" onClick={toggleTheme}>
+        {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
       </button>
 
       <h1>Pet the Cat!</h1>
       
-      <div className="adsense-placeholder">AdSense Area</div>
+      <div className="adsense-placeholder">AdSense Slot</div>
 
       <div className="cat-container" onClick={handlePet}>
         <div className="pixel-cat">
@@ -92,27 +95,43 @@ function App() {
           <div className="eye right"></div>
           <div className="nose"></div>
         </div>
-        <p style={{ marginTop: '20px', fontSize: '10px' }}>Click to Pet!</p>
+        <p style={{ marginTop: '20px', fontSize: '10px' }}>TAP TO PET!</p>
       </div>
 
       <div className="clicks-info">
-        <p>Your Pets: {localClicks}</p>
-        <p>Your Country: {country?.country_name || 'Detecting...'}</p>
+        <p>Your Contribution: {localClicks}</p>
+        <p>Location: {country?.country_name || '...'}</p>
       </div>
 
       <div className="stats-panel">
-        <h3>🏆 Global Rankings</h3>
-        {stats.length === 0 ? <p>Loading rankings...</p> : (
-          stats.slice(0, 10).map((stat, idx) => (
-            <div key={stat.country_code} className="stat-item">
-              <span>{idx + 1}. {stat.country_name}</span>
-              <span>{stat.click_count.toLocaleString()}</span>
-            </div>
-          ))
-        )}
+        <div className="tab-buttons">
+          <button 
+            className={rankTab === 'allTime' ? 'active' : ''} 
+            onClick={() => setRankTab('allTime')}
+          >
+            <Trophy size={12} /> All-Time
+          </button>
+          <button 
+            className={rankTab === 'recent' ? 'active' : ''} 
+            onClick={() => setRankTab('recent')}
+          >
+            <TrendingUp size={12} /> Trending (5m)
+          </button>
+        </div>
+
+        <div className="rankings">
+          {currentStats.length === 0 ? <p>Waiting for data...</p> : (
+            currentStats.map((stat, idx) => (
+              <div key={stat.country_code} className="stat-item">
+                <span>{idx + 1}. {stat.country_name}</span>
+                <span>{stat.click_count.toLocaleString()}</span>
+              </div>
+            ))
+          )}
+        </div>
       </div>
 
-      <div className="adsense-placeholder">AdSense Area</div>
+      <div className="adsense-placeholder">AdSense Slot</div>
 
       <AnimatePresence>
         {effects.map(eff => (
@@ -121,21 +140,15 @@ function App() {
             initial={{ opacity: 1, y: eff.y - 50, x: eff.x - 10 }}
             animate={{ opacity: 0, y: eff.y - 150 }}
             exit={{ opacity: 0 }}
-            style={{
-              position: 'fixed',
-              pointerEvents: 'none',
-              fontSize: '24px',
-              color: '#ff6b6b',
-              zIndex: 100
-            }}
+            style={{ position: 'fixed', pointerEvents: 'none', fontSize: '24px', color: '#ff6b6b', zIndex: 100 }}
           >
             ❤
           </motion.div>
         ))}
       </AnimatePresence>
 
-      <footer style={{ marginTop: '2rem', fontSize: '8px', color: '#888' }}>
-        Help your country reach #1!
+      <footer style={{ marginTop: '1rem', fontSize: '8px', color: '#888' }}>
+        Global Cat Petting Challenge
       </footer>
     </div>
   );
