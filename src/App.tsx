@@ -87,8 +87,6 @@ function App() {
 
       <h1>Pet the Cat!</h1>
       
-      <div className="adsense-placeholder">AdSense Slot</div>
-
       <div className="cat-container" onClick={handlePet}>
         <div className="pixel-cat">
           <div className="eye left"></div>
@@ -130,8 +128,6 @@ function App() {
           )}
         </div>
       </div>
-
-      <div className="adsense-placeholder">AdSense Slot</div>
 
       <AnimatePresence>
         {effects.map(eff => (
